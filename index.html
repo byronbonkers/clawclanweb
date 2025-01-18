@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Claw Clan</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="https://cdn-icons-png.flaticon.com/512/4244/4244703.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://cdn-icons-png.flaticon.com/512/4244/4244703.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://cdn-icons-png.flaticon.com/512/4244/4244703.png">
+    <link rel="manifest" href="images/site.webmanifest">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+         /* Style for profile and coin display */
+         
+        .body {
+            font-family: 'Comic Sans MS', sans-serif; 
+            line-height: 1.6;
+            background-color: #f0f8ff;
+            color: #333;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center; /* Aligns items in the profile section vertically */
+            gap: 10px; /* Spacing between elements */
+            right: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+            flex-direction: row-reverse;
+        }
+
+        header {
+            display: flex;
+            align-items: center; /* Vertically centers content */
+            justify-content: space-between; /* Keeps elements separated */
+            height: 60px; /* Adjust to desired navbar height */
+            padding: 0 20px; /* Optional: Add horizontal padding */
+        }
+
+
+        .profile-section h1 {
+            margin: 0 10px;
+            font-size: 1.1em;
+            color: #333;
+            vertical-align: middle; /* Aligns with the text */
+        }
+        
+        .coin-display {
+            margin-left: 10px; /* Adjust margin to space between profile and coins */
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .coinsImg {
+            padding-right: 4px;
+            padding-left: 15px;
+        }
+
+        .coinsDiv {
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-weight: bold; 
+            color: rgb(237, 232, 232)
+        }
+
+        /* Grid Layout for Claw Machines */
+        .claw-machines {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            width: 100%;       /* Ensure it takes full width */
+            max-width: 1200px; /* Optional: limits the maximum width of the grid */
+        }
+
+        .claw-machine-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            padding: 10px;
+        }
+
+        .claw-machine-card img {
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        .claw-machine-card h3 {
+            color: #0077b6;
+            margin: 10px 0;
+        }
+
+        .claw-machine-card button {
+            background-color: #0077b6;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .claw-machine-card button:hover {
+            background-color: #0096c7;
+        }
+
+        /* Play Options Container Styling */
+        .play-options {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8); /* Dark transparent background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        /* Dialog Box Styling */
+        .dialog {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Title Styling */
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+        height: 48px; /* Keeps it proportional */
+        width: auto;
+        display: inline-block;
+        vertical-align: middle; /* Aligns with the text */
+        margin-right: 8px; /* Adds space between logo and text */
+    }
+
+    nav a {
+        vertical-align: middle; /* Ensures the text aligns with the logo */
+        line-height: 48px; /* Matches the logo's height */
+    }
+
+        /* Play Options Container */
+        .play-options-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Option Styling */
+        .option {
+            flex: 1 1 45%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px; /* Consistent spacing between elements */
+        }
+
+        /* Image Styling */
+        .option-img {
+            max-width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+            transition: transform 0.2s ease;
+            border-radius: 8px; /* Slightly rounded corners for images */
+        }
+
+        .option-img:hover {
+            transform: scale(1.1);
+        }
+
+        /* Button Styling */
+        .option-btn {
+            background: linear-gradient(135deg, #6dd5ed, #2193b0); /* Cool gradient */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%; /* Ensure consistent button size */
+        }
+
+        .option-btn:hover {
+            background: linear-gradient(135deg, #2193b0, #6dd5ed);
+            transform: translateY(-3px);
+        }
+
+        /* Animation for Modal Appearance */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+        .right {
+            float: right; 
+        }
+
+
+</style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul class="nav-links">
+                <li>
+                    <a href="index.html">
+                        <img src="images/ClawClan.png" alt="ClawClan Logo" class="logo" />
+                    </a>
+                </li>
+                <!-- <li><a onclick="showPlayOptions(1)">Claw Machine 1</a></li> -->
+                <!-- <li><a onclick="showPlayOptions(2)">Claw Machine 2</a></li>
+                <li><a href="/claw3.html">Claw Machine 3</a></li>
+                <li><a href="/claw4.html">Claw Machine 4</a></li> -->
+                <li class="right"><a href="shop.html">Shop</a></li>
+                <li class="right"><a href="coins.html">Coins</a></li>
+            </ul>
+        </nav>
+        <!-- Profile section for coins and profile picture -->
+        <div class="profile-section" id="auth-section"></div>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>Welcome to the Ultimate Claw Machine Arcade!</h1>
+            <p>Experience the thrill of grabbing your favorite prizes from the comfort of your home. Choose a claw machine and start winning today!</p>
+        </section>
+        
+        <!-- Claw Machines Grid -->
+        <section class="claw-machines">
+            <div class="claw-machine-card">
+                <img src="images/highestquality.jpg" alt="Claw Machine 1">
+                <h3>Claw Machine 1</h3>
+                <button onclick="showPlayOptions(1)">Play</button>
+            </div>
+            <!-- <div class="claw-machine-card">
+                <img src="claw-machine2.jpg" alt="Claw Machine 2">
+                <h3>Claw Machine 2</h3>
+                <button onclick="showPlayOptions(2)">Play</button>
+            </div>
+            <div class="claw-machine-card">
+                <img src="claw-machine3.jpg" alt="Claw Machine 3">
+                <h3>Claw Machine 3</h3>
+                <button onclick="showPlayOptions(3)">Play</button>
+            </div>
+            <div class="claw-machine-card">
+                <img src="claw-machine4.jpg" alt="Claw Machine 4">
+                <h3>Claw Machine 4</h3>
+                <button onclick="showPlayOptions(4)">Play</button>
+            </div> -->
+        </section>
+    </main>
+    <script>
+    function showPlayOptions(machineId) {
+        // Get modal element
+        const modal = document.getElementById('play-options');
+    
+        // Example: Dynamically update the options based on the machine ID
+        const optionButtons = modal.querySelectorAll('.option-btn');
+        if (machineId === 1) {
+            optionButtons[0].setAttribute('onclick', "document.location='machine1.html?tickets'");
+            optionButtons[1].setAttribute('onclick', "document.location='machine1.html?avocado'");
+        } else if (machineId === 2) {
+            optionButtons[0].setAttribute('onclick', "document.location='machine1.html?plush1'");
+            optionButtons[1].setAttribute('onclick', "document.location='machine1.html?plush2'");
+        } else {
+            optionButtons[0].setAttribute('onclick', `document.location='machine1.html?machine${machineId}-option1'`);
+            optionButtons[1].setAttribute('onclick', `document.location='machine1.html?machine${machineId}-option2'`);
+        }
+    
+        // Show the modal
+        modal.style.display = 'flex';
+    }
+    
+    // Function to close the modal
+    function closeModal() {
+        const modal = document.getElementById('play-options');
+        modal.style.display = 'none';
+    }
+</script>
+<div class="play-options" id="play-options" style="display: none;">
+    <div class="dialog">
+        <h2 class="modal-title">Choose Your Play Option</h2>
+        <div class="play-options-container">
+            <div class="option">
+                <img src="images/tickets.svg" alt="Tickets" class="option-img">
+                <button class="option-btn" onclick="document.location='machine1.html?tickets'">25 Tickets</button>
+            </div>
+            <div class="option">
+                <img src="Avocado.png" alt="Avocado" class="option-img">
+                <button class="option-btn" onclick="document.location='machine1.html?avocado'">Avocado Plushie</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('click', (event) => {
+    const modal = document.getElementById('play-options');
+    if (event.target === modal) {
+        modal.style.display = 'none';
+    }
+});
+</script>
+
+    <!-- Clerk SDK with your publishable key and frontend API URL -->
+    <script
+    async
+    crossorigin="anonymous"
+    data-clerk-publishable-key=""
+    src="https://large-puma-40.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+    type="text/javascript"
+    ></script>
+
+    <script>
+        // Initialize Clerk
+        window.addEventListener('load', async function () {
+            // Load Clerk SDK and wait for it to be ready
+            await Clerk.load();
+
+            const authSection = document.getElementById('auth-section');
+
+            // Check if the user is logged in
+            if (Clerk.user) {
+                const coins = Clerk.user.publicMetadata.coins || 0;
+                authSection.innerHTML = `
+                    <div id="user-button"></div>
+                    <div class="coinsDiv"> <img class="coinsImg" src="coin.svg" width="20" height="20">${coins}</div>
+                `;
+                Clerk.mountUserButton(document.getElementById('user-button'));
+            } else {
+                authSection.innerHTML = `<a href="login.html" class="login-link">Login</a>`;
+            }
+        });
+
+        function showPlayOptions(machineId) {
+            // Show the play options modal when a machine is clicked
+            const playOptions = document.getElementById('play-options');
+            playOptions.style.display = 'flex';
+            // Optionally, you can store the machineId if you need to track which machine was chosen
+        }
+
+        function play(option) {
+            const coins = Clerk.user.publicMetadata.coins || 0;
+            if (option === 'tickets' && coins >= 7) {
+                alert('You are playing for 25 tickets!');
+                window.location.replace("http://www.w3schools.com");
+            } else if (option === 'avocado' && coins >= 12) {
+                alert('You are playing for an avocado plush!');
+                Clerk.user.publicMetadata.coins -= 12;
+            } else {
+                alert('Not enough coins!');
+            }
+
+            // Close the modal after playing
+            document.getElementById('play-options').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
