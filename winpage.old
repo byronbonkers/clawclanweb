@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Past Wins</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f3f3f3;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    #wins-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      width: 90%;
+      max-width: 1200px;
+    }
+
+    .win-item {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .win-item img {
+      width: 100%;
+      height: auto;
+      max-height: 150px;
+      object-fit: cover;
+    }
+
+    .win-item h3 {
+      margin: 10px 0 0;
+    }
+
+    .win-item button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .win-item button:hover {
+      background-color: #45a049;
+    }
+
+    /* Popup styles */
+    #popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #popup-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    #popup-content input,
+    #popup-content textarea {
+      width: 100%;
+      margin: 10px 0;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+
+    #popup-content button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #popup-content button:hover {
+      background-color: #45a049;
+    }
+    .profile-section {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+            flex-direction: row-reverse; /* Reverse the order idk */
+        }
+        
+        .profile-section h1 {
+            margin: 0 10px;
+            font-size: 1.1em;
+            color: #333;
+        }
+        
+        .coin-display {
+            margin-left: 10px; /* Adjust margin to space between profile and coins */
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+        }
+  </style>
+  <script
+  async
+  crossorigin="anonymous"
+  data-clerk-publishable-key="pk_test_bGFyZ2UtcHVtYS00MC5jbGVyay5hY2NvdW50cy5kZXYk"
+  src="https://large-puma-40.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+  type="text/javascript"
+  ></script>
+</head>
+<body>
+  <div class="profile-section" id="auth-section"></div>
+  <h1>Your Past Wins</h1>
+  <div id="wins-container"></div>
+
+  <!-- Popup for Redeeming -->
+  <div id="popup">
+    <div id="popup-content">
+      <h2>Redeem Prize</h2>
+      <input type="text" id="name" placeholder="Your Name" required />
+      <input type="text" id="address" placeholder="Shipping Address" required />
+      <textarea id="details" placeholder="Additional Details (optional)"></textarea>
+      <button onclick="submitRedeem()">Submit</button>
+      <button onclick="closePopup()">Cancel</button>
+    </div>
+  </div>
+  
+  <script>
+    // Initialize Clerk
+    window.addEventListener('load', async function () {
+            // Load Clerk SDK and wait for it to be ready
+            await Clerk.load();
+            
+            const authSection = document.getElementById('auth-section');
+
+            // Check if the user is logged in
+            if (Clerk.user) {
+                renderPrizes();
+                // Display the user profile with their name and coin count
+                const coins = Clerk.user.publicMetadata.coins || 0;
+                authSection.innerHTML = `
+                    <div class="coin-display">Coins: ${coins}</div>
+                    <div id="user-button"></div>
+                `;
+                Clerk.mountUserButton(document.getElementById('user-button'));
+            } else {
+                // Display the login button
+                authSection.innerHTML = `<a href="/claw/login.html" class="login-link">Login</a>`;
+            }
+        });
+</script>
+
+  <script>
+    // Simulated API call to fetch prize data
+    async function fetchPrizes() {
+        console.log(Clerk.user.publicMetadata.prizes)
+        return JSON.parse(JSON.stringify(Clerk.user.publicMetadata.prizes));
+      // Replace with your actual API endpoint
+      /*return [
+        { name: "Teddy Bear", image: "https://via.placeholder.com/150", redeemed: false },
+        { name: "Gift Card", image: "https://via.placeholder.com/150", redeemed: true },
+        { name: "Smartphone", image: "https://via.placeholder.com/150", redeemed: false },
+      ];*/
+    }
+
+    // Function to render prizes dynamically
+    async function renderPrizes() {
+      const winsContainer = document.getElementById("wins-container");
+      winsContainer.innerHTML = ""; // Clear previous entries
+
+      const prizes = await fetchPrizes(); // Fetch prizes
+
+      prizes.forEach((prize, index) => {
+        // Create a container for each prize
+        const prizeItem = document.createElement("div");
+        prizeItem.className = "win-item";
+
+        // Add the prize image
+        const img = document.createElement("img");
+        img.src = prize.image;
+        img.alt = prize.name;
+        prizeItem.appendChild(img);
+
+        // Add the prize name
+        const name = document.createElement("h3");
+        name.textContent = prize.name;
+        prizeItem.appendChild(name);
+
+        // Add Redeem button if not redeemed
+        if (!prize.redeemed) {
+          const button = document.createElement("button");
+          button.textContent = "Redeem";
+          button.onclick = () => openPopup(index);
+          prizeItem.appendChild(button);
+        }
+
+        // Append the prize to the container
+        winsContainer.appendChild(prizeItem);
+      });
+    }
+
+    // Popup functions
+    let redeemingPrizeIndex = null;
+
+    function openPopup(index) {
+      redeemingPrizeIndex = index;
+      document.getElementById("popup").style.display = "flex";
+    }
+
+    function closePopup() {
+      redeemingPrizeIndex = null;
+      document.getElementById("popup").style.display = "none";
+    }
+
+    async function submitRedeem() {
+        const name = document.getElementById("name").value;
+        const address = document.getElementById("address").value;
+        const details = document.getElementById("details").value;
+
+        if (!name || !address) {
+            alert("Please fill in all required fields.");
+            return;
+        }
+
+        // Simulate sending redemption data to the server
+        console.log(`Redeeming prize #${redeemingPrizeIndex}:`, { name, address, details });
+
+        // Simulate server response to update the redeemed status
+     //   const prizes = await fetchPrizes(); // Fetch prizes again (simulate server state update)
+       // prizes[redeemingPrizeIndex].redeemed = true; // Update redeemed status locally
+
+        closePopup();
+
+        // Refresh the UI by re-rendering prizes
+        renderPrizes();
+    }
+
+
+    // Initialize the page
+   
+  </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Claw Machine Camera Stream</title>
+    <script src="https://byronbonkers.com:19132/janus.js"></script> <!-- Adjust the URL if you use a different path -->
+</head>
+<body>
+    <h1>Claw Machine Camera Stream</h1>
+    <video id="claw-stream" width="640" height="480" autoplay playsinline controls></video>
+    <script>
+        let janus = null;
+        let streaming = null;
+
+        Janus.init({
+            debug: "all",
+            callback: function() {
+                janus = new Janus({
+                    server: "https://byronbonkers.com:19132", // Use your Janus HTTPS URL
+                    success: function() {
+                        janus.attach({
+                            plugin: "janus.plugin.streaming",
+                            success: function(pluginHandle) {
+                                streaming = pluginHandle;
+                                streaming.send({ message: { request: "watch", id: 1 } });
+                            },
+                            onmessage: function(msg, jsep) {
+                                if (jsep) {
+                                    streaming.createAnswer({
+                                        jsep: jsep,
+                                        media: { audioSend: false, videoSend: false },
+                                        success: function(jsep) {
+                                            streaming.send({ message: { request: "start" }, jsep: jsep });
+                                        }
+                                    });
+                                }
+                            },
+                            onremotestream: function(stream) {
+                                let video = document.getElementById("claw-stream");
+                                Janus.attachMediaStream(video, stream);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

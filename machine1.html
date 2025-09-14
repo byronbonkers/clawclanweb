@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Claw Machine 🎉</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://cdn-icons-png.flaticon.com/512/4244/4244703.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://cdn-icons-png.flaticon.com/512/4244/4244703.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://cdn-icons-png.flaticon.com/512/4244/4244703.png">
+    <link rel="manifest" href="images/site.webmanifest">
+    <style>
+        /* Overall Layout */
+        body { 
+            font-family: 'Comic Sans MS', sans-serif; 
+            background: linear-gradient(135deg, #ff69b4, #800080); 
+            color: rgb(white); 
+            overflow-x: hidden; 
+            text-align: center;
+        }
+        h1 { 
+            font-size: 2.5em; 
+            margin-top: 20px; 
+            animation: pulse 2s infinite;
+        }
+        
+        /* Clown Background */
+        .clown-bg { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: -1; 
+            opacity: 0.1; 
+            background-image: url('clown-background.png');
+            background-size: cover;
+            background-position: center;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+
+        .buttons { 
+            display: inline; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 15px;  
+            margin-top: 40px;
+            justify-items: center;  
+        }
+
+        .buttons button { 
+            padding: 20px 40px; 
+            font-size: 1.5em; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 12px; 
+            background: #4CAF50; 
+            color: white; 
+            transition: transform 0.2s ease, background 0.5s ease;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
+            margin-bottom: 25px;
+        }
+        
+        .player-wrapper {
+            margin: 0 auto;
+            width: 640px;
+            height: 480px;
+        }
+
+        .buttons button:active {
+            transform: scale(1.1);
+            background: #45a049;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            color: white;
+            text-align: center;
+        }
+
+        .popup button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            color: white;
+        }
+
+        .popup #buyBtn {
+            background-color: #4CAF50;
+        }
+
+        .popup #closeBtn {
+            background-color: #f44336;
+        }
+
+        #notEnoughCoins {
+            color: yellow;
+            margin-top: 15px;
+        }
+
+        .blocked {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+    </style>
+    <style>
+        /* Styling for the win popup */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #333;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+            color: white;
+            text-align: center;
+            z-index: 1001;
+        }
+    
+        .popupWon h2 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #4CAF50;
+        }
+        .popupLost h2 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #b54545;
+        }
+    
+        .popup button {
+            padding: 10px 20px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            background-color: #4CAF50;
+            color: white;
+            transition: background 0.3s;
+        }
+    
+        .popup button:hover {
+            background-color: #45a049;
+        }
+
+        .closeBtn {
+            color:#f44336
+        }
+                 /* Style for profile and coin display */
+                 .profile-section {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+            flex-direction: row-reverse; /* Reverse the order idk */
+        }
+        
+        /* Profile section styling */
+        .profile-section {
+            display: flex;
+            align-items: center; /* Aligns items in the profile section vertically */
+            gap: 10px; /* Spacing between elements */
+            right: 10px;
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+            flex-direction: row-reverse;
+        }
+
+        header {
+            display: flex;
+            align-items: center; /* Vertically centers content */
+            justify-content: space-between; /* Keeps elements separated */
+            height: 60px; /* Adjust to desired navbar height */
+            padding: 0 20px; /* Optional: Add horizontal padding */
+        }
+
+        .logo {
+            height: 48px; /* Keeps it proportional */
+            width: auto;
+            display: inline-block;
+            vertical-align: middle; /* Aligns with the text */
+            margin-right: 8px; /* Adds space between logo and text */
+        }
+
+        nav a {
+            vertical-align: middle; /* Ensures the text aligns with the logo */
+            line-height: 48px; /* Matches the logo's height */
+        }
+        
+        .coin-display {
+            margin-left: 10px; /* Adjust margin to space between profile and coins */
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .coinsImg {
+            padding-right: 4px;
+            padding-left: 15px;
+        }
+
+        .coinsDiv {
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-weight: bold; 
+            color: rgb(237, 232, 232)
+        }
+        /* Add this CSS to your existing styles */
+        .fade-out {
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* Adjust the duration as needed */
+        }
+        .fade-in {
+            opacity: 100;
+            transition: opacity 1s ease-in-out; /* Adjust the duration as needed */
+        }
+
+        /* Container for scaling content */
+        .content-wrapper {
+            transform: scale(1.25); /* Scale content by 125% */
+            transform-origin: top center; /* Ensure scaling is anchored to top-left corner */
+        }
+
+    </style>
+    
+    <script
+    async
+    crossorigin="anonymous"
+    data-clerk-publishable-key="pk_test_bGFyZ2UtcHVtYS00MC5jbGVyay5hY2NvdW50cy5kZXYk"
+    src="https://large-puma-40.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+    type="text/javascript"
+    ></script>  
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<header>
+    <nav>
+        <ul class="nav-links">
+            <li>
+                <a href="index.html">
+                    <img src="images/ClawClan.png" alt="ClawClan Logo" class="logo" />
+                </a>
+            </li>
+            <!-- <li><a onclick="showPlayOptions(1)">Claw Machine 1</a></li> -->
+            <!-- <li><a onclick="showPlayOptions(2)">Claw Machine 2</a></li>
+            <li><a href="/claw3.html">Claw Machine 3</a></li>
+            <li><a href="/claw4.html">Claw Machine 4</a></li> -->
+            <li class="right"><a href="shop.html">Shop</a></li>
+            <li class="right"><a href="coins.html">Coins</a></li>
+        </ul>
+    </nav>
+    <!-- Profile section for coins and profile picture -->
+    <div class="profile-section" id="auth-section"></div>
+</header>
+<body>
+    <div class="content-wrapper"> <!-- Start of scaled content wrapper -->
+    <h1 style="color:rgb(255, 251, 251);">Ultimate Claw Machine </h1>
+    <div class="clown-bg"></div>
+    <!-- <audio id="backgroundMusic" src="clown.mp3" loop></audio> -->
+    <div class="link-container">
+    </div>
+    <script>
+
+    </script>
+    <div class="popup" id="ticketPopup">
+        <p>You have to spend <span id="ticketCount"></span> coins to continue.</p>
+        <button id="buyBtn">Play</button>
+        <button id="closeBtn">Close</button>
+        <p id="notEnoughCoins" style="display: none;">You don't have enough coins.</p>
+    </div>
+    <script>
+        // Map button clicks to keyboard keys
+        const buttonToKey = {
+            'forward': 87,   // W
+            'left': 65,   // A
+            'fun': 83,   // S
+            'right': 68,   // D
+            'up': 90,   // Up Arrow
+            'grab': 88  // Down Arrow
+        };
+
+
+        // Hold state for buttons (if they're pressed or not)
+        let buttonState = {
+            'button_f': false,
+            'button_l': false,
+            'button_b': false,
+            'button_r': false,
+            'button_u': false,
+            'button_d': false
+        };
+
+        // Function to simulate pressing a key
+        function simulateKeyPress(key) {
+            sendCommand(key)
+        }
+
+      
+        // Start spamming the key when the button is pressed
+        function spamKey(buttonId) {
+            const key = buttonToKey[buttonId];
+            console.log(buttonId)
+            const spamInterval = setInterval(() => {
+                if (buttonState[buttonId]) {
+                    simulateKeyPress(key);  // Simulate key press
+                } else {
+                    clearInterval(spamInterval);  // Stop spamming when button is released
+                }
+            }, 50); // 50ms delay for spam speed (adjust as needed)
+        }
+
+   let lastExecutionTime = 0; // Keep track of the last execution time
+    const throttleDelay = 150; // Delay in milliseconds (adjust as needed)
+    
+    document.addEventListener('keydown', function(event) {
+        const currentTime = Date.now(); // Get current time
+    
+        // Check if the event should be throttled
+        if (currentTime - lastExecutionTime >= throttleDelay) {
+            Object.keys(buttonToKey).forEach(buttonId => {  
+                if (event.keyCode == buttonToKey[buttonId]) {
+                    console.log(buttonId);
+                    sendCommand(buttonId);
+                    lastExecutionTime = currentTime; // Update the last execution time
+                }
+            });
+        }
+    });
+
+    </script>
+    <script>
+        if (navigator.userAgent.includes("Firefox")) {
+          const popup = document.createElement("span");
+          popup.className = "popuptext show";
+          popup.id = "myPopup";
+          popup.textContent = "fuck you, we don't work on firefox cus wss don't work cus customcheat sat on the mosquitto's dick";
+          document.body.appendChild(popup);
+        }
+      </script>
+
+<div class="popup popupWon" id="winPopup" style="display: none;">
+    <h2>Congratulations! 🎉</h2>
+    <p>You won! Enjoy your prize!</p>
+    <button style="background-color: #f44336" class="closeBtn" id="winCloseBtn">Close</button>
+    <button id="playAgainWon">Play again</button>
+</div>
+
+<div class="popup popupLost" id="lostPopup" style="display: none;">
+    <h2>You have lost!</h2>
+    <p>But remember, you can always try again!</p>
+    <button style="background-color: #f44336" id="lostCloseBtn">Close</button>
+    <button id="playAgainLost">Play again</button>
+</div>
+<!-- Include canvas-confetti for the confetti animation -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
+
+
+<script src="webrtmp.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ovenplayer/dist/ovenplayer.js"></script>
+<div class="player-wrapper">
+    <!-- OvenPlayer will be initialized inside this element. -->
+    <div id="player_id"></div>
+</div>
+<div class="buttons blocked" id="buttonContainer">
+    <button id="button_b" onclick="sendCommand('fun')">🖕Back</button>
+    <button id="button_f" onclick="sendCommand('forward')">👇Forward</button>
+    <button id="button_u" onclick="sendCommand('up')">⬆️ Up</button>
+    <button id="button_d" onclick="sendCommand('grab')">⬇️ Grab</button>
+    <button id="button_l" onclick="sendCommand('left')">⬅️ Left</button>
+    <button id="button_r" onclick="sendCommand('right')">➡️ Right</button>
+    <button id="button_camera" onclick="changeView()">📷 Change Camera</button>
+    <div id="countdownTimer" style="font-size: 1.5em; margin-top: 20px; color: yellow;"></div>
+</div>
+<script>
+      var changingCamera = false;
+      let seconds = 0;
+        // Initialize OvenPlayer
+        const player = OvenPlayer.create('player_id', {
+            autoStart: true,
+            aspectRatio: '4:3',
+            disableSeekUI: true,
+            showBigPlayButton: false,
+            controls: false,
+            mute: true,     // Mute video to ensure autoplay works on all browsers
+            waterMark: {
+            text: `Claw Clan`,
+            font: {
+            'font-size': '20px',
+            'color': '#fff',
+            'font-weight': 'bold'
+            },
+            position: 'top-right'
+        },
+            sources: [
+                {
+                    label: 'Test',
+                    // Set the type to 'webrtc'
+                    type: 'webrtc',
+                    // Set the file to WebRTC Signaling URL with OvenMediaEngine 
+                    file: 'wss://clawclan.co.uk:3334/app/stream'
+                }
+            ]
+        });
+        function changeView(){
+            sendCommand('camera');
+            changingCamera = true;
+            tryToLoadStream()
+        }
+        function tryToLoadStream(){
+            console.log("Trying to load stream...")        
+            var playlist = [
+            {
+                label: 'Test',
+                // Set the type to 'webrtc'
+                type: 'webrtc',
+                // Set the file to WebRTC Signaling URL with OvenMediaEngine 
+                file: 'wss://clawclan.co.uk:3334/app/stream'
+            }
+        ]
+            player.load(playlist)
+            //setTimeout(tryToLoadStream, 2000);
+            
+        }
+        var haveinterval = 0;
+        player.on('stateChanged', function(stateobj) {
+            
+            const newstate = stateobj.newstate;
+            console.log("state changed: " + newstate)
+            if(!newstate)
+                return;
+            if(newstate == "error"){
+                changingCamera = true;
+            }
+            if (changingCamera == false)
+                return;
+            
+            if(newstate == "playing"){
+                changingCamera = false;
+                clearInterval(haveinterval)
+                haveinterval = 0
+            }
+            if(newstate == "error"){
+                console.log("Interval started")
+                if(haveinterval == 0){
+                    const interval = setInterval(function() {
+                        if(changingCamera){
+                            tryToLoadStream()
+                        }
+                    }, 2000);
+                    haveinterval = interval;
+                }
+                /*console.log("Bruh err")
+                setInterval(function() {
+                    if(changingCamera){
+                        tryToLoadStream()
+                    }
+                }, 2000);*/
+            }
+            /*console.log("Reloading stream!")
+                setTimeout(function () {
+                    
+                    var newstate = stateobj.newstate
+                    if(newstate == "idle" || newstate == "error" || newstate == "loading"){
+                        
+                        var playlist = [
+                        {
+                            label: 'Test',
+                            // Set the type to 'webrtc'
+                            type: 'webrtc',
+                            // Set the file to WebRTC Signaling URL with OvenMediaEngine 
+                            file: 'wss://clawclan.co.uk:3334/app/stream'
+                        }
+                    ]
+                        player.load(playlist)
+                    }
+                }, 1000);
+            changingCamera = false;*/
+        });
+        
+ 
+    </script>
+    
+    <link href="https://cdn.jsdelivr.net/npm/video.js@7.12.3/dist/video-js.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/video.js@7.12.3/dist/video.min.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const ticketPopup = document.getElementById('ticketPopup');
+        const buyBtn = document.getElementById('buyBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const notEnoughCoinsText = document.getElementById('notEnoughCoins');
+        const buttonContainer = document.getElementById('buttonContainer');
+    
+        // Declare prizeID and ticketAmount in a higher scope
+        let prizeID = 0;
+        let ticketAmount = 0;
+    
+        const urlParams = new URLSearchParams(window.location.search);
+        // Check for specific parameters
+        if (urlParams.has('avocado')) {
+            console.log('Playing to win an avocado');
+            prizeID = 2; // Set prizeID
+            ticketAmount = 13; // Set ticket amount
+            document.getElementById('ticketCount').textContent = ticketAmount;
+            document.title = 'Claw Machine - Win an Avocado! 🎉';
+        } else if (urlParams.has('tickets')) {
+            console.log('Playing to win tickets');
+            prizeID = 1; // Set prizeID
+            ticketAmount = 7; // Set ticket amount
+            document.getElementById('ticketCount').textContent = ticketAmount;
+            document.title = 'Claw Machine - Win Tickets! 🎟️';
+        } else {
+            console.log('Default state - No specific prize selected');
+        }
+    
+        // playAgainWon
+        const playAgainWon = document.getElementById('playAgainWon');
+        const playAgainLost = document.getElementById('playAgainLost');
+    
+        const winPopup = document.getElementById('winPopup');
+        const winCloseBtn = document.getElementById('winCloseBtn');
+    
+        const lostPopup = document.getElementById('lostPopup');
+        const lostCloseBtn = document.getElementById('lostCloseBtn');
+    
+        const status1 = document.getElementById('status1');
+        const status2 = document.getElementById('status2');
+        winCloseBtn.addEventListener('click', () => {
+            winPopup.style.display = 'none';
+            document.location='index.html'
+        });
+    
+        lostCloseBtn.addEventListener('click', () => {
+            lostPopup.style.display = 'none';
+            document.location='index.html'
+        });
+    
+        playAgainLost.addEventListener('click', () => {
+            lostPopup.style.display = 'none';
+            buttonContainer.classList.add('fade-in'); // Add fade-out class to button container
+            buttonContainer.classList.remove('blocked'); // Enable buttons
+            buttonContainer.classList.remove('fade-out');
+            buyNewGame()
+        });
+    
+        playAgainWon.addEventListener('click', () => {
+            winPopup.style.display = 'none';
+            buttonContainer.classList.remove('blocked'); // Enable buttons
+            buttonContainer.classList.add('fade-in'); // Add fade-out class to button container
+            buttonContainer.classList.remove('fade-out');
+            buyNewGame()
+        });
+    
+        function showWinPopup() {
+            winPopup.style.display = 'block';
+            // Launch confetti
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+    
+        function showLostPopup() {
+            lostPopup.style.display = 'block';
+        }
+    
+        // Function to refresh the user profile
+        async function refreshUserProfile() {
+            const authSection = document.getElementById('auth-section');
+    
+            // Ensure Clerk is loaded before trying to access Clerk.user
+            if (Clerk.user) {
+                // Display the user profile with their name and coin count
+                const coins = Clerk.user.publicMetadata.coins || 0;
+                authSection.innerHTML = `
+                    <div id="user-button"></div>
+                    <div class="coinsDiv"> 
+                        <img class="coinsImg" src="coin.svg" width="20" height="20">${coins}
+                    </div>
+                `;
+                Clerk.mountUserButton(document.getElementById('user-button'));
+                console.log("User profile updated " + coins)
+            } else {
+                // Redirect user to login page
+                document.location = 'login.html'               
+            }
+        }
+
+await Clerk.load();
+    
+// Refresh the user profile after Clerk is loaded
+await refreshUserProfile();
+    let countdownInterval = null;
+
+        // Show the popup on page load
+        ticketPopup.style.display = 'block';
+    
+        async function buyNewGame(){
+            try {
+                var response = await callApi();
+                console.log(response);
+                if (response.err) {
+                    console.log(response.err);
+                    notEnoughCoinsText.textContent = response.err;
+                    notEnoughCoinsText.style.display = 'block';
+                    setTimeout(2);
+                    buyBtn.onclick = () => document.location = 'coins.html';
+                } else if (response.username && response.password) {
+                    // Initialize MQTT with the provided credentials
+                    const brokerUrl = 'wss://clawclan.co.uk:19132';
+                    const controlTopic = 'claw_machine/control';
+                    const statusTopic = 'claw_machine/status';
+                    const client = mqtt.connect(brokerUrl, {
+                        username: response.username,
+                        password: response.password
+                    });
+                    await Clerk.load();
+                    await refreshUserProfile();
+                    client.on('connect', () => {
+                        console.log('Connected to MQTT broker');
+                        buttonContainer.classList.remove('blocked'); // Enable buttons
+                        buttonContainer.classList.remove('fade-out');
+                        sendCommand("startGame");
+                        ticketPopup.style.display = 'none'; // Close the popup
+                        startCountdown(15); // Start the 15-second countdown
+                        refreshUserProfile(); // Refresh user profile when game starts
+                        client.subscribe(statusTopic, (err) => {
+                            if (err) {
+                                console.error('Failed to subscribe to status topic:', err);
+                            } else {
+                                console.log('Subscribed to status topic:', statusTopic);
+                                //console.log(coins)
+                            }
+                        });
+                    });
+    
+                    client.on('message', (topic, message) => {
+                        if (topic === statusTopic) {
+                            const status = message.toString().trim();
+                            console.log('Received status update:', status);
+    
+                            // Check if the status indicates a win
+                            if (status === 'win') {
+                                showWinPopup(); // Show the win popup with confetti
+                                refreshUserProfile();
+                                client.end();
+                            }
+                            if (status === 'lost') {
+                                showLostPopup(); // Show the loss popup
+                                refreshUserProfile();
+                                client.end();
+                            }
+                        }
+                    });
+    
+                    client.on('error', (err) => {
+                        console.error('MQTT connection error:', err);
+                    });
+    
+                    // Send commands via MQTT
+                    window.sendCommand = (direction) => {
+                        client.publish(controlTopic, direction);
+                    };
+                }
+            } catch (error) {
+                console.error('Error during API request:', error);
+            }
+        }
+    
+        buyBtn.addEventListener('click', async () => {
+            await buyNewGame();
+        });
+    
+        // Grab button click event
+        const grabButton = document.getElementById('button_d');
+        grabButton.addEventListener('click', () => {
+            buttonContainer.classList.add('fade-out'); // Add fade-out class to button container
+        });
+    
+        closeBtn.addEventListener('click', () => {
+            ticketPopup.style.display = 'none';
+            document.location = 'index.html';
+        });
+    
+        function startCountdown(seconds) {
+            if (countdownInterval) {
+        clearInterval(countdownInterval);
+    }
+            const countdownTimer = document.getElementById('countdownTimer');
+            countdownTimer.textContent = `Time left: ${seconds}s`;
+            const interval = setInterval(() => {
+                seconds--;
+                countdownTimer.textContent = `Time left: ${seconds}s`;
+    
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    countdownTimer.textContent = ''; // Clear the timer after countdown ends
+                    buttonContainer.classList.add('blocked'); // Disable buttons after countdown ends
+                }
+            }, 1000);
+        }
+    });
+    
+
+        async function getAuthToken() {
+            try {
+                const token = await Clerk.session.getToken({ template: 'grafbase' });
+                console.log(token);
+                return token ? `Bearer ${token}` : null;
+            } catch (error) {
+                console.error('Error retrieving token:', error);
+                return null;
+            }
+        }
+
+        async function callApi() {
+            const authToken = await getAuthToken();
+                if (authToken) {
+                    try {
+                const urlParams = new URLSearchParams(window.location.search);
+                // Check for specific parameters
+                var prizeId = 1;
+                if (urlParams.has('avocado')) {
+                    console.log('Playing to win an avocado');
+                    prizeID = 1; // Set prizeID
+                    ticketAmount = 13; // Set ticket amount
+                    document.getElementById('ticketCount').textContent = ticketAmount;
+                    document.title = 'Claw Machine - Win an Avocado! 🎉';
+                } else if (urlParams.has('tickets')) {
+                    console.log('Playing to win tickets');
+                    prizeID = 0; // Set prizeID
+                    ticketAmount = 7; // Set ticket amount
+                    document.getElementById('ticketCount').textContent = ticketAmount;
+                    document.title = 'Claw Machine - Win Tickets! 🎟️';
+                } else {
+                    console.log('Default state - No specific prize selected');
+                }
+                    const toSend = {
+                        prize: prizeID
+                    }
+                    const response = await fetch(`https://clawclan.co.uk/api/startClaw1Game`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': authToken,
+                        },
+                        body: JSON.stringify(toSend)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    return await response.json(); // Return the response data
+                } catch (error) {
+                    console.error('API call failed:', error);
+                    throw error; // Re-throw error to handle it where the function is called
+                }
+           } else {
+                throw new Error('Authorization token could not be obtained');
+            }
+        }
+        window.addEventListener('load', async function () {
+    // Initialize Clerk
+    await Clerk.load();
+
+    // Function to refresh the user profile
+    function refreshUserProfile() {
+        const authSection = document.getElementById('auth-section');
+
+        // Check if the user is logged in
+        if (Clerk.user) {
+            // Display the user profile with their name and coin count
+            const coins = Clerk.user.publicMetadata.coins || 0;
+            authSection.innerHTML = `
+                <div id="user-button"></div>
+                <div class="coinsDiv"> 
+                    <img class="coinsImg" src="coin.svg" width="20" height="20">${coins}
+                </div>
+            `;
+            Clerk.mountUserButton(document.getElementById('user-button'));
+        } else {
+            // Display the login button
+            authSection.innerHTML = `<a href="login.html" class="login-link">Login</a>`;
+        }
+    }
+
+    // Call the function to initially load the user profile
+    refreshUserProfile();
+});
+    </script>
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+    <!-- <script>
+        
+        document.addEventListener("DOMContentLoaded", () => {
+        const audio = document.getElementById("backgroundMusic");
+
+        // Try to autoplay the audio on page load
+        audio.play().catch(() => {
+            // Show play button if autoplay fails
+            document.getElementById("playButton").style.display = "block";
+        });
+    });
+
+    function startMusic() {
+        const audio = document.getElementById("backgroundMusic");
+        audio.play();
+        document.getElementById("playButton").style.display = "none"; // Hide button after playback starts
+    }
+    </script> -->
+    <div>
+</body>
+</html>
+
+
